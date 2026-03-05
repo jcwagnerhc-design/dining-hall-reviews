@@ -1,7 +1,13 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { supabase } from '../db/supabase.js';
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+let anthropic;
+function getAnthropicClient() {
+  if (!anthropic) {
+    anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  }
+  return anthropic;
+}
 
 export async function runSummarizer(monthYear) {
   // Fetch all recommendations for the month
@@ -61,7 +67,7 @@ Important rules:
 - Be accurate with counts — each recommendation should be counted exactly once
 - Return ONLY the JSON object, nothing else`;
 
-  const message = await anthropic.messages.create({
+  const message = await getAnthropicClient().messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 2000,
     messages: [{ role: 'user', content: prompt }],
